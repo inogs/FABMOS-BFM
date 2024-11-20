@@ -11,7 +11,9 @@ git checkout master
 
 Back to fabmos
 
-`cd ../../../../`
+```
+cd ../../../../
+```
 
 Create a conda environment with the necessary packages
 
@@ -22,7 +24,9 @@ conda activate fabmos
 
 Install FABMOS
 
-`pip install .`
+```
+pip install .
+```
 
 ## RUN SIMULATIONS
 
@@ -38,17 +42,25 @@ tar xopf MITgcm_2.8deg.tar
 
 Use the directory of the transport matrix as working directory to launch simulations
 
-`cd MITgcm_2.8deg`
+```
+cd MITgcm_2.8deg
+```
 
 Link a configuration file from the BFM repository
 
-`ln -s ../../fabmos/extern/fabm/extern/ogs/fabm_monospectral_2xDetritus.yaml fabm.yaml`
+```
+ln -s ../../fabmos/extern/fabm/extern/ogs/fabm_monospectral_2xDetritus.yaml fabm.yaml
+```
 
 Link the python script to run the simulation
 
-`ln -s ../BFM.py`
+```
+ln -s ../BFM.py
+```
 
 Launch the simulation
 
-`python BFM.py`
+```
+python BFM.py
+```
 
