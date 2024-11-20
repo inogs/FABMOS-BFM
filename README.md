@@ -2,11 +2,15 @@
 Python scripts to perform global ocean offline simulations with BFM.
 
 ## INSTALLING
-To be sure to use the last version of the BFM chechkout the master branch of the BFM repository 
+First clone this repository and enter the new folder
 
 ```
 git clone --recursive https://github.com/inogs/FABMOS-BFM.git
 cd FABMOS-BFM
+```
+To be sure to use the last version of the BFM chechkout the master branch of the BFM repository 
+
+```
 cd fabmos/extern/fabm/extern/ogs
 git checkout master
 ```
