@@ -12,7 +12,7 @@ To be sure to use the last version of the BFM chechkout the master branch of the
 
 ```
 cd fabmos/extern/fabm/extern/ogs
-git checkout master
+git checkout iron
 ```
 
 Back to fabmos
@@ -26,6 +26,12 @@ Create a conda environment with the necessary packages
 ```
 conda env create -f environment.yml
 conda activate fabmos
+```
+
+On HPC machines some errors in installing the package pygetm in fabmos environment can occur. The package can be installed with the following specifications.
+
+```
+conda install pygetm -c bolding-bruggeman -c conda-forge --override-channels
 ```
 
 Install FABMOS
@@ -55,7 +61,7 @@ cd MITgcm_2.8deg
 Link a configuration file from the BFM repository
 
 ```
-ln -s ../../fabmos/extern/fabm/extern/ogs/fabm_monospectral_2xDetritus.yaml fabm.yaml
+ln -s ../../fabmos/extern/fabm/extern/ogs/fabm_iron.yaml fabm.yaml
 ```
 
 Link the python script to run the simulation
