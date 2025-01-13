@@ -8,10 +8,19 @@ First clone this repository and enter the new folder
 git clone --recursive https://github.com/inogs/FABMOS-BFM.git
 cd FABMOS-BFM
 ```
-To be sure to use the last version of the BFM chechkout the master branch of the BFM repository 
+
+Use new branch of fabmos
+```
+cd fabmos
+git checkout new_pygetm
+```
+
+To be sure to use the last version of the BFM checkout the master branch of the FABM and BFM repository 
 
 ```
-cd fabmos/extern/fabm/extern/ogs
+cd extern/fabm
+git checkout master
+cd extern/ogs
 git checkout iron
 ```
 
