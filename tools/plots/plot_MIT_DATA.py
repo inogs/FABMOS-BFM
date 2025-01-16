@@ -24,7 +24,7 @@ def argument():
                                 type = str,
                                 required = True,
                                 default="richnessNORM",
-                                help = ''' Choice are: richness, richnessNORM,  shannon, PO4, TCHL'''
+                                help = ''' Choice are: richness, richnessNORM,  shannon, shannonNORM, PO4, TCHL'''
 
                                 )
 
@@ -51,19 +51,18 @@ def argument():
     return parser.parse_args()
 
 def richness(indata,threshold):
-# First 35 are plankton organisms
-    res=(indata[0:35] > threshold).sum()
+    res=(indata > threshold).sum()
     if res>threshold:
        return res
     else:
        return np.nan
 
 def richnessNORM(indata,threshold):
-# First 35 are plankton organisms
-    TOT         = indata[0:35].sum()
+    indata = indata[indata>threshold]
+    TOT = indata.sum()
     if TOT < threshold:
        return np.nan
-    indata_norm = indata[0:35]/TOT
+    indata_norm = indata/TOT
     res=(indata_norm > threshold).sum()
     if res>threshold:
        return res
@@ -71,46 +70,41 @@ def richnessNORM(indata,threshold):
        return np.nan
 
 def shannon(indata,threshold):
-# First 35 are plankton organisms
-
-    SUM = indata[0:35].sum()
+    SUM = indata.sum()
     if SUM < threshold:
        return np.nan
 
 # compute TOT, excluding extinct organisms
     TOT = 0
-    for i in range(35):
-       if indata[i] >threshold:
-           TOT+= indata[i]
+    for dat in indata:
+       if dat >threshold:
+           TOT+= dat
 
 # compute shannon index
     S = 0
-    for i in range(35): 
-       if indata[i] >threshold:
-           S+= - indata[i]/TOT*np.log(indata[i]/TOT)
+    for dat in indata: 
+       if dat >threshold:
+           S+= - dat/TOT*np.log(dat/TOT)
 
     return S
 
 def shannonNORM(indata,threshold):
-# First 35 are plankton organisms
-
-    SUM = indata[0:35].sum()
+    SUM = indata.sum()
     if SUM < threshold:
-       return np.nan
+        return np.nan
 
 # compute TOT, excluding extinct organisms
     TOT = 0
     R   = 0
-    for i in range(35):
-       if indata[i] >threshold:
-           TOT+= indata[i]
-           R+= 1.
-
-# compute shannon index (normalized ove 1)
+    for dat in indata:
+       if dat >threshold:
+           TOT+= dat
+           R  += 1.
+# compute shannon index
     S = 0
-    for i in range(35):
-       if indata[i] >threshold:
-           S+= - indata[i]/TOT*np.log(indata[i]/TOT)
+    for dat in indata: 
+       if dat >threshold:
+           S+= - dat/TOT*np.log(dat/TOT)
 
     return S/np.log(R)
 
@@ -140,16 +134,48 @@ year='clim'#args.input_file.split("_")[3][0:4]
 t=args.temporal_frame
 k=args.depth_frame
 
-with NC.Dataset(args.input_file,"r") as ncMM:
-     jpi     = ncMM.dimensions['xt'].size # Longitude
-     jpj     = ncMM.dimensions['yt'].size # Latitude
-     lonM    = ncMM.variables['lont'][:,:]
-     latM    = ncMM.variables['latt'][:,:]
-     lonMD   = ncMM.variables['lont'][0,:]
-     latMD   = ncMM.variables['latt'][:,0]
-     PO4     = ncMM.variables['N1_p'][t,k,:,:]
-     TCHL    = ncMM.variables['P1_Chl'][t,k,:,:] + ncMM.variables['P2_Chl'][t,k,:,:] + ncMM.variables['P3_Chl'][t,k,:,:] + ncMM.variables['P4_Chl'][t,k,:,:] 
-     CarbonBiomass = ncMM.variables['P1_c'][t,k,:,:] + ncMM.variables['P2_c'][t,k,:,:] + ncMM.variables['P3_c'][t,k,:,:] + ncMM.variables['P4_c'][t,k,:,:] 
+#with NC.Dataset(args.input_file,"r") as ncMM:
+ncMM = NC.Dataset(args.input_file,"r")
+jpi     = ncMM.dimensions['x'].size # Longitude
+jpj     = ncMM.dimensions['y'].size # Latitude
+lonM    = ncMM.variables['lon'][:,:]
+latM    = ncMM.variables['lat'][:,:]
+lonMD   = ncMM.variables['lon'][0,:]
+latMD   = ncMM.variables['lat'][:,0]
+PO4     = ncMM.variables['N1_p'][t,k,:,:]
+TCHL    = np.zeros(np.shape(PO4))
+CarbonBiomass = np.zeros(np.shape(PO4))
+numPFT = 0
+for idv,var in enumerate(ncMM.variables.keys()):
+   if 'Chl' in var:
+        TCHL+=ncMM.variables[var][t,k,:,:]
+   if 'P' in var:
+       if '_c' in var:
+           CarbonBiomass+=ncMM.variables[var][t,k,:,:]
+   if 'P' in var:
+       if '_c' in var:
+        numPFT+=1 
+   if 'Z' in var:
+       if '_c' in var:
+        numPFT+=1
+        
+TCHL[TCHL<0]=np.nan
+
+PFT_Biomasses = np.zeros((numPFT,jpj,jpi))
+PFT_names = []
+id_pft = 0
+for idv,var in enumerate(ncMM.variables.keys()):
+   if 'P' in var:
+        if '_c' in var:
+            PFT_Biomasses[id_pft,:,:]=ncMM.variables[var][t,k,:,:]
+            PFT_names.append(var)
+            id_pft+=1
+   if 'Z' in var:
+        if '_c' in var:
+            PFT_Biomasses[id_pft,:,:]=ncMM.variables[var][t,k,:,:]
+            PFT_names.append(var)
+            id_pft+=1
+  
 
 PHYTO_R=np.zeros((jpj,jpi)) 
 #richness, richnessNORM,  shannon
@@ -157,19 +183,19 @@ indicator=args.indicator
 if indicator == 'richness':
     for jj in range(jpj):
         for ji in range(jpi):
-            PHYTO_R[jj,ji]=richness(CarbonBiomass[jj,ji],0.001)
+            PHYTO_R[jj,ji]=richness(PFT_Biomasses[:,jj,ji],0.001)
 elif indicator == 'richnessNORM':
     for jj in range(jpj):
         for ji in range(jpi):
-            PHYTO_R[jj,ji]=richnessNORM(CarbonBiomass[jj,ji],0.001)
+            PHYTO_R[jj,ji]=richnessNORM(PFT_Biomasses[:,jj,ji],0.001)
 elif indicator == 'shannon':
     for jj in range(jpj):
         for ji in range(jpi):
-            PHYTO_R[jj,ji]=shannon(CarbonBiomass[jj,ji],0.001)
+            PHYTO_R[jj,ji]=shannon(PFT_Biomasses[:,jj,ji],0.001)
 elif indicator == 'shannonNORM':
     for jj in range(jpj):
         for ji in range(jpi):
-            PHYTO_R[jj,ji]=shannonNORM(CarbonBiomass[jj,ji],0.001)
+            PHYTO_R[jj,ji]=shannonNORM(PFT_Biomasses[:,jj,ji],0.001)
 elif indicator == 'PO4':
     for jj in range(jpj):
         for ji in range(jpi):
