@@ -52,8 +52,10 @@ pip install .
 In case of errors in compilation phase, consider to add the following setup.cfg file in fabmos folder containing the
 following two lines:
 
+```
 [build_ext]
 cmake_opts=-DFABM_USE_CONTIGUOUS=OFF
+```
 
 then launch
 
