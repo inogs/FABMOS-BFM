@@ -49,6 +49,19 @@ Install FABMOS
 pip install .
 ```
 
+In case of errors in compilation phase, consider to add the following setup.cfg file in fabmos folder containing the
+following two lines:
+
+[build_ext]
+cmake_opts=-DFABM_USE_CONTIGUOUS=OFF
+
+then launch
+
+```
+pip install .
+```
+
+
 ## RUN SIMULATIONS
 
 To run a simulation a transport matrix is needed for the circulation. Several matrices are available at [Samar Khatiwala](http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/). Download one in the testcases directory and unzip it.
