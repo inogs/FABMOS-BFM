@@ -24,7 +24,7 @@ def argument():
                                 type = str,
                                 required = True,
                                 default="richnessNORM",
-                                help = ''' Choice are: richness, richnessNORM,  shannon, shannonNORM, PO4, TCHL'''
+                                help = ''' Choice are: richness, richnessNORM,  shannon, shannonNORM, PO4, TCHL, Fe'''
 
                                 )
 
@@ -143,8 +143,8 @@ latM    = ncMM.variables['lat'][:,:]
 lonMD   = ncMM.variables['lon'][0,:]
 latMD   = ncMM.variables['lat'][:,0]
 PO4     = ncMM.variables['N1_p'][t,k,:,:]
-TCHL    = np.zeros(np.shape(PO4))
-CarbonBiomass = np.zeros(np.shape(PO4))
+TCHL    = np.ma.zeros(np.shape(PO4))
+CarbonBiomass = np.ma.zeros(np.shape(PO4))
 numPFT = 0
 for idv,var in enumerate(ncMM.variables.keys()):
    if 'Chl' in var:
@@ -159,9 +159,9 @@ for idv,var in enumerate(ncMM.variables.keys()):
        if '_c' in var:
         numPFT+=1
         
-TCHL[TCHL<0]=np.nan
+#TCHL[TCHL<0]=np.nan
 
-PFT_Biomasses = np.zeros((numPFT,jpj,jpi))
+PFT_Biomasses = np.ma.zeros((numPFT,jpj,jpi))
 PFT_names = []
 id_pft = 0
 for idv,var in enumerate(ncMM.variables.keys()):
@@ -200,6 +200,10 @@ elif indicator == 'PO4':
     for jj in range(jpj):
         for ji in range(jpi):
             PHYTO_R[jj,ji]=PO4[jj,ji]
+elif indicator == 'Fe':
+    for jj in range(jpj):
+        for ji in range(jpi):
+            PHYTO_R[jj,ji]=Fe[jj,ji]
 elif indicator == 'TCHL':
     for jj in range(jpj):
         for ji in range(jpi):
