@@ -12,7 +12,7 @@ cd FABMOS-BFM
 Use new branch of fabmos
 ```
 cd fabmos
-git checkout new_pygetm
+git checkout main
 ```
 
 To be sure to use the last version of the BFM checkout the master branch of the FABM and BFM repository 
